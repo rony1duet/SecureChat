@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "316047741638",
+    "project_id": "gen-lang-client-0649911278",
+    "storage_bucket": "gen-lang-client-0649911278.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:316047741638:android:5aab22dadcaffa9573bdc7",
+        "android_client_info": {
+          "package_name": "com.securechat.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "316047741638-k2d9skdtufe0ldt019mdqu4vl6hqg050.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.securechat.app",
+            "certificate_hash": "65d15b7d403b06a68eb8b97f4e237c80c37f537d"
+          }
+        },
+        {
+          "client_id": "316047741638-dk0ibe2oheeja5gjqteo8j1ejv3rrjat.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBzj0-OsrUL0khw9t0StOPN5cL1tNA0H9w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "316047741638-dk0ibe2oheeja5gjqteo8j1ejv3rrjat.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
