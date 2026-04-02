@@ -415,7 +415,8 @@ fun ChatListItem(
     val otherUserId = chat.participants.find { it != currentUserId } ?: "Unknown"
     var otherUser by remember { mutableStateOf<UserProfile?>(null) }
     var isTyping by remember { mutableStateOf(false) }
-    val unreadCount = chat.unreadCount[currentUserId] ?: 0
+    val unreadCount = (chat.unreadCount[currentUserId] ?: 0L).coerceAtLeast(0L)
+    val hasUnread = unreadCount > 0L
 
     LaunchedEffect(otherUserId) {
         repository.getUserProfile(otherUserId).collectLatest { otherUser = it }
@@ -429,10 +430,21 @@ fun ChatListItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
+            .background(if (hasUnread) MaterialTheme.colorScheme.primary.copy(alpha = 0.08f) else Color.Transparent)
             .padding(horizontal = 20.dp, vertical = 12.dp)
-            .background(if (unreadCount > 0) MaterialTheme.colorScheme.primary.copy(alpha = 0.05f) else Color.Transparent),
+            .padding(start = if (hasUnread) 4.dp else 0.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        if (hasUnread) {
+            Box(
+                modifier = Modifier
+                    .width(3.dp)
+                    .height(56.dp)
+                    .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(99.dp))
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+        }
+
         Box(modifier = Modifier.size(56.dp)) {
             AsyncImage(
                 model = getOptimizedGooglePhotoUrl(otherUser?.photoURL, otherUser?.email),
@@ -467,7 +479,7 @@ fun ChatListItem(
                 Text(
                     text = (otherUser?.displayName ?: otherUserId).uppercase(),
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = if (unreadCount > 0) FontWeight.ExtraBold else FontWeight.Bold,
+                    fontWeight = if (hasUnread) FontWeight.ExtraBold else FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -475,8 +487,8 @@ fun ChatListItem(
                 Text(
                     text = formatTimestampShort(chat.updatedAt),
                     style = MaterialTheme.typography.labelSmall,
-                    color = if (unreadCount > 0) MaterialTheme.colorScheme.primary else Slate500,
-                    fontWeight = if (unreadCount > 0) FontWeight.Bold else FontWeight.Normal
+                    color = if (hasUnread) MaterialTheme.colorScheme.primary else Slate500,
+                    fontWeight = if (hasUnread) FontWeight.Bold else FontWeight.Normal
                 )
             }
             Spacer(modifier = Modifier.height(4.dp))
@@ -505,13 +517,13 @@ fun ChatListItem(
                         Text(
                             text = chat.lastMessage?.text ?: "No messages yet",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = if (unreadCount > 0) MaterialTheme.colorScheme.onSurface else Slate500,
-                            fontWeight = if (unreadCount > 0) FontWeight.SemiBold else FontWeight.Normal,
+                            color = if (hasUnread) MaterialTheme.colorScheme.onSurface else Slate500,
+                            fontWeight = if (hasUnread) FontWeight.SemiBold else FontWeight.Normal,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
                     }
-                    if (unreadCount > 0) {
+                    if (hasUnread) {
                         Surface(
                             color = MaterialTheme.colorScheme.primary,
                             shape = CircleShape,

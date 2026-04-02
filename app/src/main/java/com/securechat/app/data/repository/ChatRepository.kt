@@ -4,6 +4,8 @@ import android.util.Log
 import com.securechat.app.data.FirebaseConfig
 import com.securechat.app.data.model.*
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.Timestamp
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.FieldValue
@@ -32,11 +34,54 @@ class ChatRepository {
                     return@addSnapshotListener
                 }
                 val chats = snapshot?.documents?.mapNotNull { doc ->
-                    doc.toObject(Chat::class.java)?.copy(id = doc.id)
+                    doc.toChat()
                 } ?: emptyList()
                 trySend(chats)
             }
         awaitClose { listener.remove() }
+    }
+
+    private fun DocumentSnapshot.toChat(): Chat? {
+        val participants = get("participants") as? List<*> ?: return null
+        val participantIds = participants.mapNotNull { it as? String }
+        if (participantIds.isEmpty()) return null
+
+        val unreadCountRaw = get("unreadCount") as? Map<*, *> ?: emptyMap<Any, Any>()
+        val unreadCount = unreadCountRaw.entries
+            .mapNotNull { (key, value) ->
+                val userKey = key as? String ?: return@mapNotNull null
+                val count = (value as? Number)?.toLong() ?: 0L
+                userKey to count
+            }
+            .toMap()
+
+        return Chat(
+            id = id,
+            participants = participantIds,
+            lastMessage = parseLastMessage(get("lastMessage") as? Map<*, *>),
+            lastMessageId = getString("lastMessageId") ?: "",
+            unreadCount = unreadCount,
+            updatedAt = getTimestamp("updatedAt") ?: Timestamp.now(),
+            createdAt = getTimestamp("createdAt") ?: Timestamp.now()
+        )
+    }
+
+    private fun parseLastMessage(raw: Map<*, *>?): LastMessage? {
+        if (raw == null) return null
+
+        val text = raw["text"] as? String ?: ""
+        val senderId = raw["senderId"] as? String ?: ""
+        val status = raw["status"] as? String ?: "sent"
+        val timestamp = raw["timestamp"] as? Timestamp ?: Timestamp.now()
+
+        if (text.isBlank() && senderId.isBlank()) return null
+
+        return LastMessage(
+            text = text,
+            senderId = senderId,
+            timestamp = timestamp,
+            status = status
+        )
     }
 
     fun getMessages(chatId: String): Flow<List<Message>> = callbackFlow {
