@@ -436,19 +436,9 @@ fun ChatListItem(
             .clickable { onClick() }
             .background(if (hasUnread) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else Color.Transparent)
             .padding(horizontal = 20.dp, vertical = 12.dp)
-            .padding(start = if (hasUnread) 8.dp else 0.dp),
+            .padding(start = 0.dp, end = 0.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (hasUnread) {
-            Box(
-                modifier = Modifier
-                    .width(4.dp)
-                    .height(56.dp)
-                    .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(99.dp))
-            )
-            Spacer(modifier = Modifier.width(12.dp))
-        }
-
         Box(modifier = Modifier.size(56.dp)) {
             AsyncImage(
                 model = getOptimizedGooglePhotoUrl(otherUser?.photoURL, otherUser?.email),
