@@ -51,7 +51,7 @@ fun ChatListScreen(onChatClick: (Chat) -> Unit, onSettingsClick: () -> Unit) {
 
     var currentUser by remember { mutableStateOf(FirebaseAuth.getInstance().currentUser) }
     var currentUserProfile by remember { mutableStateOf<UserProfile?>(null) }
-    
+
     val scope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
 
@@ -73,8 +73,12 @@ fun ChatListScreen(onChatClick: (Chat) -> Unit, onSettingsClick: () -> Unit) {
         }
     }
 
-    LaunchedEffect(Unit) {
-        repository.getChats().collectLatest { chats = it }
+    LaunchedEffect(currentUser?.uid) {
+        if (currentUser?.uid != null) {
+            repository.getChats().collectLatest { chats = it }
+        } else {
+            chats = emptyList()
+        }
     }
 
     LaunchedEffect(searchQuery) {
@@ -114,10 +118,10 @@ fun ChatListScreen(onChatClick: (Chat) -> Unit, onSettingsClick: () -> Unit) {
                                     .clip(CircleShape),
                                 contentScale = ContentScale.Crop
                             )
-                            
+
                             val isVisible = currentUserProfile?.showOnlineStatus != false
                             val isOnline = (currentUserProfile?.status == "online") && isVisible
-                            
+
                             Box(
                                 modifier = Modifier
                                     .size(14.dp)
@@ -129,7 +133,7 @@ fun ChatListScreen(onChatClick: (Chat) -> Unit, onSettingsClick: () -> Unit) {
                                             !isVisible -> Slate400
                                             isOnline -> Color(0xFF22C55E)
                                             else -> Color.Gray
-                                        }, 
+                                        },
                                         CircleShape
                                     )
                             )
@@ -142,10 +146,10 @@ fun ChatListScreen(onChatClick: (Chat) -> Unit, onSettingsClick: () -> Unit) {
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
-                            
+
                             val isVisible = currentUserProfile?.showOnlineStatus != false
                             val isOnline = (currentUserProfile?.status == "online") && isVisible
-                            
+
                             Text(
                                 text = if (isOnline) "ONLINE" else if (!isVisible) "INVISIBLE" else "OFFLINE",
                                 style = MaterialTheme.typography.labelSmall,
@@ -430,19 +434,19 @@ fun ChatListItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
-            .background(if (hasUnread) MaterialTheme.colorScheme.primary.copy(alpha = 0.08f) else Color.Transparent)
+            .background(if (hasUnread) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else Color.Transparent)
             .padding(horizontal = 20.dp, vertical = 12.dp)
-            .padding(start = if (hasUnread) 4.dp else 0.dp),
+            .padding(start = if (hasUnread) 8.dp else 0.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (hasUnread) {
             Box(
                 modifier = Modifier
-                    .width(3.dp)
+                    .width(4.dp)
                     .height(56.dp)
                     .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(99.dp))
             )
-            Spacer(modifier = Modifier.width(10.dp))
+            Spacer(modifier = Modifier.width(12.dp))
         }
 
         Box(modifier = Modifier.size(56.dp)) {
@@ -518,7 +522,7 @@ fun ChatListItem(
                             text = chat.lastMessage?.text ?: "No messages yet",
                             style = MaterialTheme.typography.bodyMedium,
                             color = if (hasUnread) MaterialTheme.colorScheme.onSurface else Slate500,
-                            fontWeight = if (hasUnread) FontWeight.SemiBold else FontWeight.Normal,
+                            fontWeight = if (hasUnread) FontWeight.Bold else FontWeight.Normal,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
